@@ -1,0 +1,2 @@
+pyensembl>=1.9.3
+biopython>=1.79

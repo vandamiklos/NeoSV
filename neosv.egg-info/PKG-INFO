@@ -1,0 +1,24 @@
+Metadata-Version: 2.4
+Name: neosv
+Version: 0.0.4
+Summary: Neoantigens from Structural Variations
+Author: Yang Shi
+Author-email: <shiyang_bio@163.com>
+Keywords: python,bioinformatics,genomics,neoantigen,structural variation
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: OS/2
+License-File: LICENSE
+Requires-Dist: pyensembl>=1.9.3
+Requires-Dist: biopython>=1.79
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: keywords
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: summary
+
+neosv is a workflow for annotating SVs and predicting neoantigens from SVs

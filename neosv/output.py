@@ -28,6 +28,8 @@ def write_fusion(filepath, svfusions, dict_neo):
         f.write(header + '\n')
         for svfusion in svfusions:
             for neoepitope in svfusion.neoepitopes:
+                if neoepitope not in dict_neo:
+                    continue
                 for allele in dict_neo[neoepitope]:
                     if dict_neo[neoepitope][allele][3] == 'PASS':
                         affinity = str(dict_neo[neoepitope][allele][0])
