@@ -164,6 +164,20 @@ def hla_load(filepath):
     return ','.join(hla_alleles)
 
 
+def hla2_load(filepath):
+    """
+    :param filepath: the absolute path of a HLA typing file
+    :return: a list of HLA alleles joined by ,
+    """
+    hla_alleles = []
+    filename = os.path.basename(filepath)
+    with open(filepath, 'r') as f:
+        for line in f:
+            hla_allele = line.rstrip()
+            hla_alleles.append(hla_allele)
+    return ','.join(hla_alleles)
+
+
 
 def ensembl_load(release, gtf_file, cdna_file, cache_dir):
     """
@@ -187,6 +201,15 @@ def ensembl_load(release, gtf_file, cdna_file, cache_dir):
         ensembl.index()
     return ensembl
 
+
+def get_window_range(window):
+    """
+    :param window: the args.window given by user
+    :return: a list of window sizes
+    """
+    start = int(window.split('-')[0])
+    end = int(window.split('-')[1])
+    return list(range(start, end+1))
 
 def get_window_range(window):
     """

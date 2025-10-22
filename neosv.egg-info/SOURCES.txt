@@ -10,6 +10,7 @@ neosv/fusion_utils.py
 neosv/input.py
 neosv/main.py
 neosv/netMHC.py
+neosv/netMHCII.py
 neosv/output.py
 neosv/result_filter.py
 neosv/sequence_utils.py

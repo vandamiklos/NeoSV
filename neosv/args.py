@@ -9,8 +9,15 @@ def create_arg_parser():
                         help='Structural variants in VCF or BEDPE format. NeoSV will discern the format based on the file suffix.')
     parser.add_argument('-hf', '--hla-file', dest='hlafile', metavar='HLA_FILE', default=None,
                         help='HLA alleles (resolution: 4 digit, e.g. HLA-A*02:01), with one allele per line.')
+    parser.add_argument('-hf2', '--hla-file2', dest='hlafile2', metavar='HLA_FILE2', default=None,
+                        help='HLA alleles (python mhc_II_binding.py alleles), with one allele per line.')
     parser.add_argument('-np', '--netmhc-path', dest='netmhc', metavar='NETMHC_PATH', default=None,
                         help='Absolute path to the netMHCpan execution file, please skip this parameter if netMHCpan has been added to your PATH.')
+    parser.add_argument('-npii', '--netmhcii-path', dest='netmhcii', metavar='NETMHCII_PATH', default=None,
+                        help='Absolute path to the netMHCIIpan execution file, please skip this parameter if netMHCIIpan has been added to your PATH.')
+    parser.add_argument('-mii', '--netmhcii-method', dest='method', metavar='NETMHCII_METHOD', default='nn_align',
+                        choices=['nn_align', 'comblib', 'consensus3', 'netmhciipan_el', 'etmhciipan_ba', 'nn_align', 'smm_align', 'sturniolo'],
+                        help='netMHCIIpan methods.')
     parser.add_argument('-o', '--out', dest='outdir', metavar='OUTDIR', required=True,
                         help="Folder for all result files. A new folder will be created if it does not exist.")
     parser.add_argument('-p', '--prefix', dest='prefix', metavar='PREFIX', default='sample',
@@ -28,7 +35,10 @@ def create_arg_parser():
     parser.add_argument('-pd', '--pyensembl-cache-dir', dest='cachedir', metavar='PYEMSEMBL_CACHE_DIR', default=None,
                         help='Directory for Pyensembl cache files. If not specified, the platform-specific cache folder will be used.')
     parser.add_argument('-l', '--epitope-lengths', dest='window', metavar='EPITOPE_LENGTHS', default='8-11',
-                        help='Lengths of neoepitopes to predict MHC binding. Default: 8-11.')
+                        help='Lengths of neoepitopes to predict MHC I binding. Default: 8-11.')
+    parser.add_argument('-lii', '--epitope-lengths-mhcii', dest='windowii', metavar='EPITOPEII_LENGTHS',
+                        default='13-25',
+                        help='Lengths of neoepitopes to predict MHC II binding. Default: 13-25')
     parser.add_argument('-ic', '--ic50-cutoff', dest='aff_cutoff', metavar='IC50_CUTOFF', type=float, default=500,
                         help='Filter neoepitopes with IC50 (nM) above this value. Default: 500.')
     parser.add_argument('-brc', '--ba-ranking-cutoff', dest='ba_rank_cutoff', metavar='RANKING_CUTOFF', type=float,

@@ -1,11 +1,12 @@
 import os
 from .args import create_arg_parser
-from .input import vcf_load, bedpe_load, hla_load, ensembl_load, get_window_range
+from .input import vcf_load, bedpe_load, hla_load, ensembl_load, get_window_range, hla2_load
 from .sv_utils import sv_pattern_infer_vcf, sv_pattern_infer_bedpe, remove_duplicate
 from .annotation_utils import sv_to_sveffect
 from .fusion_utils import sv_to_svfusion
 from .sequence_utils import set_nt_seq, set_aa_seq, generate_neoepitopes
 from .netMHC import netmhc_pep_prep, netmhc_run, netmhc_reload, netmhc_filter
+from .netMHCII import netmhcii_pep_prep, netmhcii_run, netmhcii_reload, netmhcii_filter
 from .output import write_annot, write_fusion
 
 
@@ -39,8 +40,10 @@ def main():
     if not args.anno:
         # load the hla file and join the alleles by ,
         hla_alleles = hla_load(args.hlafile)
+        hla_alleles2 = hla2_load(args.hlafile2)
         # specify the lengths of neoepitopes you want to predict
         window_range = get_window_range(args.window)
+        window_range_mhcii = get_window_range(args.windowii)
         # transform StructuralVariant class to SVFusion class
         sv_fusions = [sv_to_svfusion(sv, ensembl) for sv in svs]
         # remove those empty SVFusions
@@ -69,6 +72,35 @@ def main():
         # generate the final outfile
         file_fusion = os.path.join(args.outdir, args.prefix + '.neoantigen.txt')
         write_fusion(file_fusion, sv_fusions, dict_epitope)
+
+
+        # predict neoepitopes with different window size for MHC II binding
+        for sv_fusion in sv_fusions:
+            sv_fusion.nt_sequence2 = set_nt_seq(sv_fusion)
+            sv_fusion.aa_sequence2 = set_aa_seq(sv_fusion)
+            #sv_fusion.neoepitopes2 = generate_neoepitopes(sv_fusion, window_range_mhcii)
+
+        # predict binding affinity using netMHCIIpan
+        file_netmhc_in_ii = os.path.join(args.outdir, args.prefix + '.net2.in.txt')
+        file_netmhc_out_ii = os.path.join(args.outdir, args.prefix + '.net2.out.txt')
+
+        if sv_fusions:
+            netmhcii_pep_prep(file_netmhc_in_ii, sv_fusions)
+            if args.netmhcii:
+                netmhcii_run(args.netmhcii, file_netmhc_in_ii, hla_alleles2, file_netmhc_out_ii, args.method)
+            else:
+                netmhcii_run('mhc_II_binding.py', file_netmhc_in_ii, hla_alleles2, file_netmhc_out_ii, args.method)
+        else:
+            open(file_netmhc_in_ii, 'w').close()
+            open(file_netmhc_out_ii, 'w').close()
+
+        # reload and filter the neoepitopes based on netMHC result
+        dict_epitope_ii = netmhcii_reload(file_netmhc_out_ii, args.method)
+        dict_epitope_ii = netmhcii_filter(dict_epitope_ii, args.aff_cutoff, args.ba_rank_cutoff, args.el_rank_cutoff, args.method)
+
+        # generate the final outfile
+        file_fusion_ii = os.path.join(args.outdir, args.prefix + '.' + args.method + '.neoantigen2.txt')
+        write_fusion(file_fusion_ii, sv_fusions, dict_epitope_ii)
 
 
 if __name__ == '__main__':
