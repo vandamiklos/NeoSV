@@ -16,7 +16,7 @@ def create_arg_parser():
     parser.add_argument('-npii', '--netmhcii-path', dest='netmhcii', metavar='NETMHCII_PATH', default=None,
                         help='Absolute path to the netMHCIIpan execution file, please skip this parameter if netMHCIIpan has been added to your PATH.')
     parser.add_argument('-mii', '--netmhcii-method', dest='method', metavar='NETMHCII_METHOD', default='nn_align',
-                        choices=['nn_align', 'comblib', 'consensus3', 'netmhciipan_el', 'etmhciipan_ba', 'nn_align', 'smm_align', 'sturniolo'],
+                        choices=['nn_align', 'comblib', 'consensus3', 'netmhciipan_el', 'netmhciipan_ba', 'nn_align', 'smm_align', 'sturniolo'],
                         help='netMHCIIpan methods.')
     parser.add_argument('-o', '--out', dest='outdir', metavar='OUTDIR', required=True,
                         help="Folder for all result files. A new folder will be created if it does not exist.")
@@ -28,6 +28,7 @@ def create_arg_parser():
                              'If your data are from other species(custom), please download the gtf '
                              'file and the cdna file from ENSEMBL website ftp://ftp.ensembl.org/pub'
                              ' and specify them using --gtf-file and --cdna-file.')
+
     parser.add_argument('-gf', '--gtf-file', dest='gtffile', metavar='GTF_FILE', default=None,
                         help='GTF file for the reference.')
     parser.add_argument('-cf', '--cdna-file', dest='cdnafile', metavar='CDNA_FILE', default=None,
@@ -37,8 +38,8 @@ def create_arg_parser():
     parser.add_argument('-l', '--epitope-lengths', dest='window', metavar='EPITOPE_LENGTHS', default='8-11',
                         help='Lengths of neoepitopes to predict MHC I binding. Default: 8-11.')
     parser.add_argument('-lii', '--epitope-lengths-mhcii', dest='windowii', metavar='EPITOPEII_LENGTHS',
-                        default='13-25',
-                        help='Lengths of neoepitopes to predict MHC II binding. Default: 13-25')
+                        default='12-30',
+                        help='Lengths of neoepitopes to predict MHC II binding. Default: 11-30')
     parser.add_argument('-ic', '--ic50-cutoff', dest='aff_cutoff', metavar='IC50_CUTOFF', type=float, default=500,
                         help='Filter neoepitopes with IC50 (nM) above this value. Default: 500.')
     parser.add_argument('-brc', '--ba-ranking-cutoff', dest='ba_rank_cutoff', metavar='RANKING_CUTOFF', type=float,
@@ -50,6 +51,12 @@ def create_arg_parser():
     parser.add_argument('--anno-only', dest='anno', action='store_true', default=False,
                         help='Only annotate SV without predicting neoantigens. If this argument is added,'
                         '--hla-file is not required, and you will only get the annotation result.')
+    parser.add_argument('--mhci-only', dest='mhcionly', action='store_true', default=False,
+                        help='Only predict MHC I binding. If this argument is added,'
+                             ', you will only get the netmhcpan result.')
+    parser.add_argument('--mhcii-only', dest='mhciionly', action='store_true', default=False,
+                        help='Only predict MHC II binding. If this argument is added.')
+
 
     args = parser.parse_args()
 

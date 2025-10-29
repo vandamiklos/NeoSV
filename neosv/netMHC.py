@@ -42,13 +42,15 @@ def netmhc_reload(resultpath):
     pep_dic = {}
     with open(resultpath, 'r') as f:
         for line in f:
-            if re.match(r'^\s+1\s+H', line):
-                tmpline = re.split(r'\s+', line)
-                allele = tmpline[2]
-                pep = tmpline[3]
-                affinity = float(tmpline[16])
-                ba_rank = float(tmpline[15])
-                el_rank = float(tmpline[13])
+            # Match lines that start with position number and HLA allele
+            if re.match(r'^\s*\d+\s+H', line):
+                tmpline = re.split(r'\s+', line.strip())
+                allele = tmpline[1]
+                pep = tmpline[2]
+                el_rank = float(tmpline[12])
+                ba_rank = float(tmpline[14])
+                affinity = float(tmpline[15])
+
                 if pep not in pep_dic:
                     pep_dic[pep] = {}
                 pep_dic[pep][allele] = [affinity, ba_rank, el_rank, 'FILTER']

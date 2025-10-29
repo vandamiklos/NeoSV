@@ -7,7 +7,7 @@ from .fusion_utils import sv_to_svfusion
 from .sequence_utils import set_nt_seq, set_aa_seq, generate_neoepitopes
 from .netMHC import netmhc_pep_prep, netmhc_run, netmhc_reload, netmhc_filter
 from .netMHCII import netmhcii_pep_prep, netmhcii_run, netmhcii_reload, netmhcii_filter
-from .output import write_annot, write_fusion
+from .output import write_annot, write_fusion, write_fusion2
 
 
 def main():
@@ -55,52 +55,51 @@ def main():
             sv_fusion.aa_sequence = set_aa_seq(sv_fusion)
             sv_fusion.neoepitopes = generate_neoepitopes(sv_fusion, window_range)
 
-        # predict binding affinity using netMHC
-        file_netmhc_in = os.path.join(args.outdir, args.prefix + '.net.in.txt')
-        file_netmhc_out = os.path.join(args.outdir, args.prefix + '.net.out.txt')
-        if sv_fusions:
-            netmhc_pep_prep(file_netmhc_in, sv_fusions)
-            netmhc_run(args.netmhc, file_netmhc_in, hla_alleles, file_netmhc_out)
-        else:
-            open(file_netmhc_in, 'w').close()
-            open(file_netmhc_out, 'w').close()
+        if not args.mhciionly:
+            # predict binding affinity using netMHC
+            file_netmhc_in = os.path.join(args.outdir, args.prefix + '.net.in.txt')
+            file_netmhc_out = os.path.join(args.outdir, args.prefix + '.net.out.txt')
+            if sv_fusions:
+                netmhc_pep_prep(file_netmhc_in, sv_fusions)
+                netmhc_run(args.netmhc, file_netmhc_in, hla_alleles, file_netmhc_out)
+            else:
+                open(file_netmhc_in, 'w').close()
+                open(file_netmhc_out, 'w').close()
 
-        # reload and filter the neoepitopes based on netMHC result
-        dict_epitope = netmhc_reload(file_netmhc_out)
-        dict_epitope = netmhc_filter(dict_epitope, args.aff_cutoff, args.ba_rank_cutoff, args.el_rank_cutoff)
+            # reload and filter the neoepitopes based on netMHC result
+            dict_epitope = netmhc_reload(file_netmhc_out)
+            dict_epitope = netmhc_filter(dict_epitope, args.aff_cutoff, args.ba_rank_cutoff, args.el_rank_cutoff)
 
-        # generate the final outfile
-        file_fusion = os.path.join(args.outdir, args.prefix + '.neoantigen.txt')
-        write_fusion(file_fusion, sv_fusions, dict_epitope)
+            # generate the final outfile
+            file_fusion = os.path.join(args.outdir, args.prefix + '.neoantigen.txt')
+            write_fusion(file_fusion, sv_fusions, dict_epitope)
 
-
+    if not args.mhcionly and not args.anno:
         # predict neoepitopes with different window size for MHC II binding
         for sv_fusion in sv_fusions:
             sv_fusion.nt_sequence2 = set_nt_seq(sv_fusion)
             sv_fusion.aa_sequence2 = set_aa_seq(sv_fusion)
-            #sv_fusion.neoepitopes2 = generate_neoepitopes(sv_fusion, window_range_mhcii)
+            sv_fusion.neoepitopes2 = generate_neoepitopes(sv_fusion, window_range_mhcii)
 
         # predict binding affinity using netMHCIIpan
-        file_netmhc_in_ii = os.path.join(args.outdir, args.prefix + '.net2.in.txt')
-        file_netmhc_out_ii = os.path.join(args.outdir, args.prefix + '.net2.out.txt')
+        for i in window_range_mhcii:
+            file_netmhc_in_ii = os.path.join(args.outdir, args.prefix + '.net2.in.'+ str(i) +'.fasta')
+            file_netmhc_out_ii = os.path.join(args.outdir, args.prefix + '.net2.out.'+ str(i) +'.txt')
 
-        if sv_fusions:
-            netmhcii_pep_prep(file_netmhc_in_ii, sv_fusions)
-            if args.netmhcii:
-                netmhcii_run(args.netmhcii, file_netmhc_in_ii, hla_alleles2, file_netmhc_out_ii, args.method)
+            if sv_fusions:
+                netmhcii_pep_prep(file_netmhc_in_ii, sv_fusions, i)
+                netmhcii_run(args.netmhcii, file_netmhc_in_ii, hla_alleles2, file_netmhc_out_ii, args.method, i)
             else:
-                netmhcii_run('mhc_II_binding.py', file_netmhc_in_ii, hla_alleles2, file_netmhc_out_ii, args.method)
-        else:
-            open(file_netmhc_in_ii, 'w').close()
-            open(file_netmhc_out_ii, 'w').close()
+                open(file_netmhc_in_ii, 'w').close()
+                open(file_netmhc_out_ii, 'w').close()
 
-        # reload and filter the neoepitopes based on netMHC result
-        dict_epitope_ii = netmhcii_reload(file_netmhc_out_ii, args.method)
-        dict_epitope_ii = netmhcii_filter(dict_epitope_ii, args.aff_cutoff, args.ba_rank_cutoff, args.el_rank_cutoff, args.method)
+            # reload and filter the neoepitopes based on netMHC result
+            dict_epitope_ii = netmhcii_reload(file_netmhc_out_ii, args.method)
+            dict_epitope_ii = netmhcii_filter(dict_epitope_ii, args.aff_cutoff, args.ba_rank_cutoff, args.el_rank_cutoff, args.method)
 
-        # generate the final outfile
-        file_fusion_ii = os.path.join(args.outdir, args.prefix + '.' + args.method + '.neoantigen2.txt')
-        write_fusion(file_fusion_ii, sv_fusions, dict_epitope_ii)
+            # generate the final outfile
+            file_fusion_ii = os.path.join(args.outdir, args.prefix + '.' + args.method + '.neoantigen2.txt')
+            write_fusion2(file_fusion_ii, sv_fusions, dict_epitope_ii)
 
 
 if __name__ == '__main__':

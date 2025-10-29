@@ -3,6 +3,9 @@
 
 A computational workflow to identify **Neo**antigens from **S**tructural **V**ariations.
 
+# Additions
+* MHC II prediction using NetMHCIIpan
+
 # New in NeoSV v0.0.4
 * Support BEDPE format as input
 * Fix bugs related to NetMHCpan 4.1 (NetMHCpan 4.0 will no longer be supported by NeoSV.)

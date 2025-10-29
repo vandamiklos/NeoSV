@@ -210,12 +210,3 @@ def get_window_range(window):
     start = int(window.split('-')[0])
     end = int(window.split('-')[1])
     return list(range(start, end+1))
-
-def get_window_range(window):
-    """
-    :param window: the args.window given by user
-    :return: a list of window sizes
-    """
-    start = int(window.split('-')[0])
-    end = int(window.split('-')[1])
-    return list(range(start, end+1))

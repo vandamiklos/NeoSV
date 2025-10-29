@@ -36,3 +36,28 @@ def write_fusion(filepath, svfusions, dict_neo):
                         ba_rank = str(dict_neo[neoepitope][allele][1])
                         el_rank = str(dict_neo[neoepitope][allele][2])
                         f.write('\t'.join(['\t'.join(svfusion.output()), neoepitope, allele, affinity, ba_rank, el_rank]) + '\n')
+
+def write_fusion2(filepath, svfusions, dict_neo):
+    """
+    :param filepath: outfile for fusion derived neoantigen
+    :param svfusions: a list of svfusion classes
+    :param dict_neo: a dictionary for neoepitopes
+    :return: None
+    """
+    with open(filepath, 'a+') as f:
+        if not len(f.read(1)):
+            header = '\t'.join(['chrom1', 'pos1', 'gene1', 'transcript_id1',
+                                'chrom2', 'pos2', 'gene2', 'transcript_id2',
+                                'svpattern', 'svtype', 'frameshift',
+                                'neoantigen', 'allele', 'smm_ic50', 'nn_ic50', 'consensus_rank'])
+            f.write(header + '\n')
+        for svfusion in svfusions:
+            for neoepitope in svfusion.neoepitopes2:
+                if neoepitope not in dict_neo:
+                    continue
+                for allele in dict_neo[neoepitope]:
+                    if dict_neo[neoepitope][allele][3] == 'PASS':
+                        smm_ic50 = str(dict_neo[neoepitope][allele][0])
+                        nn_ic50 = str(dict_neo[neoepitope][allele][1])
+                        consensus_rank = str(dict_neo[neoepitope][allele][2])
+                        f.write('\t'.join(['\t'.join(svfusion.output()), neoepitope, allele, smm_ic50, nn_ic50, consensus_rank]) + '\n')

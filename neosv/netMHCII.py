@@ -2,35 +2,34 @@ import subprocess
 import re
 
 
-def netmhcii_pep_prep(filepath, svfusions):
+def netmhcii_pep_prep(filepath, svfusions, length):
     """
     :param svfusions: a list of svfusion classes
-    :param filepath: the output file
+    :param filepath: the output fasta file
     :return: None
     """
     print("Preparing peptides for netMHC.")
     with open(filepath, 'w') as f:
-        #i = 1
+        i = 1
         for svfusion in svfusions:
-            f.write(svfusion.aa_sequence2 + '\n')
-            #for neoepitope in svfusion.neoepitopes2:
-                #f.write(f'>seq{i}' + '\n')
-                #f.write(neoepitope + '\n')
-                #i += 1
+            for neoepitope in svfusion.neoepitopes2:
+                if len(neoepitope) == length:
+                    f.write(f'>seq{i}' + '\n')
+                    f.write(neoepitope + '\n')
+                    i += 1
 
 
-def netmhcii_run(netmhciipath, fastapath, alleles, outpath, method):
+def netmhcii_run(netmhciipath, fastapath, alleles, outpath, method, len):
     """
     :param netmhciipath: absolute path of the netmhciipan execution file
     :param fastapath: input fasta file
     :param alleles: HLA alleles separated by ,
     :param outpath: outfile
     :param method: method for netMHCIIpan to use
-    :param windowii: make predictions with given peptide lengths (11-30)
     :return: None
     """
     print("Running netMHCIIpan.")
-    cmd = f'python {netmhciipath} {method} {alleles} {fastapath} 11-30 > {outpath}'
+    cmd = f'python {netmhciipath} {method} {alleles} {fastapath} {len} > {outpath}'
     p = subprocess.Popen(cmd, shell=True)
     p.wait()
 
@@ -78,7 +77,7 @@ def netmhcii_reload(resultpath, method):
                 allele = cols[0]
                 pep = cols[5]
 
-                # Extract relevant fields (you can change these if needed)
+                # Extract relevant fields
                 smm_ic50 = cols[13]
                 consensus_rank = cols[6]
                 nn_ic50 = cols[17]
@@ -94,11 +93,10 @@ def netmhcii_reload(resultpath, method):
                 nn_ic50 = safe_float(nn_ic50)
                 consensus_rank = safe_float(consensus_rank)
 
-                # Build your nested dict
+                # Build nested dict
                 if pep not in pep_dic:
                     pep_dic[pep] = {}
-
-                pep_dic[pep[allele]] = [smm_ic50, nn_ic50, consensus_rank, 'FILTER']
+                pep_dic[pep][allele] = [smm_ic50, nn_ic50, consensus_rank, 'FILTER']
         return pep_dic
 
 
@@ -120,9 +118,21 @@ def netmhcii_filter(pep_dic, aff_thre, ba_rank_thre, el_rank_thre, method):
         return pep_dic
 
     if method == 'consensus3':
+        c = 0
         for pep in pep_dic:
             for allele in pep_dic[pep]:
-                if (pep_dic[pep][allele][0] <= aff_thre and pep_dic[pep][allele][1] <= aff_thre and pep_dic[pep][allele][2] <= ba_rank_thre):
-                    pep_dic[pep][allele][3] = 'PASS'
+                if pep_dic[pep][allele][0] is not None and pep_dic[pep][allele][1] is not None:
+                    if (pep_dic[pep][allele][0] <= aff_thre and pep_dic[pep][allele][1] <= aff_thre and pep_dic[pep][allele][2] <= ba_rank_thre):
+                        pep_dic[pep][allele][3] = 'PASS'
+                        c += 1
+                if pep_dic[pep][allele][0] is None and pep_dic[pep][allele][1] is not None:
+                    if (pep_dic[pep][allele][1] <= aff_thre and pep_dic[pep][allele][2] <= ba_rank_thre):
+                        pep_dic[pep][allele][3] = 'PASS'
+                        c += 1
+                if pep_dic[pep][allele][0] is not None and pep_dic[pep][allele][1] is None:
+                    if (pep_dic[pep][allele][0] <= aff_thre and pep_dic[pep][allele][2] <= ba_rank_thre):
+                        pep_dic[pep][allele][3] = 'PASS'
+                        c += 1
+        print(f'{c} entries passed the filtering')
         return pep_dic
 
