@@ -40,7 +40,9 @@ def main():
     if not args.anno:
         # load the hla file and join the alleles by ,
         hla_alleles = hla_load(args.hlafile)
+        print(hla_alleles)
         hla_alleles2 = hla2_load(args.hlafile2)
+        print(hla_alleles2)
         # specify the lengths of neoepitopes you want to predict
         window_range = get_window_range(args.window)
         window_range_mhcii = get_window_range(args.windowii)

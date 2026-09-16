@@ -8,7 +8,7 @@ def netmhcii_pep_prep(filepath, svfusions, length):
     :param filepath: the output fasta file
     :return: None
     """
-    print("Preparing peptides for netMHC.")
+    print("Preparing peptides for netMHC II.")
     with open(filepath, 'w') as f:
         i = 1
         for svfusion in svfusions:

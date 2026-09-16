@@ -15,7 +15,26 @@ def netmhc_pep_prep(filepath, svfusions):
                 f.write(neoepitope + '\n')
 
 
-def netmhc_run(netmhcpath, peppath, alleles, outpath):
+#def netmhc_run(netmhcpath, peppath, alleles, outpath):
+#    """
+#    :param netmhcpath: absolute path of the netmhc execution file
+#    :param peppath: input peptides file
+#    :param alleles: HLA alleles separated by ,
+#    :param outpath: outfile
+#    :return: None
+#    """
+#
+#    cmd = netmhcpath \
+#        + ' -a ' + alleles \
+#        + ' -f ' + peppath \
+#        + ' -inptype 1' \
+#        + ' -BA' \
+#        + ' > ' + outpath
+#    p = subprocess.Popen(cmd, shell=True)
+#    print("Running netMHCpan.")
+#    p.wait()
+
+def netmhc_run(netmchpath, peppath, alleles, outpath):
     """
     :param netmhcpath: absolute path of the netmhc execution file
     :param peppath: input peptides file
@@ -24,14 +43,10 @@ def netmhc_run(netmhcpath, peppath, alleles, outpath):
     :return: None
     """
     print("Running netMHCpan.")
-    cmd = netmhcpath \
-        + ' -a ' + alleles \
-        + ' -f ' + peppath \
-        + ' -inptype 1' \
-        + ' -BA' \
-        + ' > ' + outpath
+    cmd = f'{netmchpath} -a {alleles} -p {peppath} -inptype 1 -BA > {outpath}'
     p = subprocess.Popen(cmd, shell=True)
     p.wait()
+
 
 
 def netmhc_reload(resultpath):

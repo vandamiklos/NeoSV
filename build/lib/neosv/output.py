@@ -44,13 +44,12 @@ def write_fusion2(filepath, svfusions, dict_neo):
     :param dict_neo: a dictionary for neoepitopes
     :return: None
     """
-    with open(filepath, 'a+') as f:
-        if not len(f.read(1)):
-            header = '\t'.join(['chrom1', 'pos1', 'gene1', 'transcript_id1',
-                                'chrom2', 'pos2', 'gene2', 'transcript_id2',
-                                'svpattern', 'svtype', 'frameshift',
-                                'neoantigen', 'allele', 'smm_ic50', 'nn_ic50', 'consensus_rank'])
-            f.write(header + '\n')
+    with open(filepath, 'w') as f:
+        header = '\t'.join(['chrom1', 'pos1', 'gene1', 'transcript_id1',
+                            'chrom2', 'pos2', 'gene2', 'transcript_id2',
+                            'svpattern', 'svtype', 'frameshift',
+                            'neoantigen', 'allele', 'smm_ic50', 'nn_ic50', 'consensus_rank'])
+        f.write(header + '\n')
         for svfusion in svfusions:
             for neoepitope in svfusion.neoepitopes2:
                 if neoepitope not in dict_neo:
