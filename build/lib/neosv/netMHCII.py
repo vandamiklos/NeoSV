@@ -57,7 +57,7 @@ def netmhcii_reload(resultpath, method):
                 if pep not in pep_dic:
                     pep_dic[pep] = {}
 
-                pep_dic[pep[allele]] = [ic50, percentile_rank, '-', 'FILTER']
+                pep_dic[pep][allele] = [ic50, percentile_rank, '-', 'FILTER']
 
         return pep_dic
 
